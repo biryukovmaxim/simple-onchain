@@ -23,7 +23,10 @@ async function main() {
 
   const value = ethers.parseUnits("2", 6);
 
-  const withdrawToTx = await gaslessSender.withdrawTo.populateTransaction(caller.address, value);
+  const withdrawToTx = await gaslessSender.withdrawTo.populateTransaction(
+    caller.address,
+    value
+  );
 
   const relay = new GelatoRelay();
   const withdrawToRequest: CallWithSyncFeeERC2771Request = {

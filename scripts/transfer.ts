@@ -21,7 +21,10 @@ async function main() {
 
   const value = ethers.parseUnits("2", 6);
 
-  const approveTx = await gaslessSender.approve.populateTransaction(caller.address, value);
+  const approveTx = await gaslessSender.approve.populateTransaction(
+    caller.address,
+    value
+  );
 
   const relay = new GelatoRelay();
   const approveRequest: CallWithSyncFeeERC2771Request = {
@@ -37,9 +40,12 @@ async function main() {
   // @ts-ignore
   let response = await relay.callWithSyncFeeERC2771(approveRequest, wallet);
   console.log({ response });
-  await new Promise(r => setTimeout(r, 5000));
+  await new Promise((r) => setTimeout(r, 5000));
 
-  const transferTx = await gaslessSender.transfer.populateTransaction("0x8389EBC35351D72280C7dF476B5A6c73393FC6BF", value);
+  const transferTx = await gaslessSender.transfer.populateTransaction(
+    "0x8389EBC35351D72280C7dF476B5A6c73393FC6BF",
+    value
+  );
 
   const transferRequest: CallWithSyncFeeERC2771Request = {
     user: caller.address,
