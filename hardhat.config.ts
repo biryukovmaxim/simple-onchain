@@ -24,7 +24,7 @@ const config: HardhatUserConfig = {
       chainId: 42161,
     }
   },
-  // defaultNetwork: "arbitrum_goerli",
+  defaultNetwork: "arbitrum_goerli",
 };
 
 export default config;
