@@ -86,7 +86,7 @@ async function main() {
     sig.v,
     sig.r,
     sig.s,
-      false
+    false
   );
 
   const relay = new GelatoRelay();

@@ -98,7 +98,8 @@ describe("Sender", function () {
           deadline,
           sig.v,
           sig.r,
-          sig.s
+          sig.s,
+          false
         );
 
       expect(await mockToken.balanceOf(await sender.getAddress())).eq(value);
