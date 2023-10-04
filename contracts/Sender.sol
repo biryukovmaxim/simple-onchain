@@ -49,23 +49,42 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
         uint256 amount,
         bytes16 extId,
         bytes calldata encodedDestination,
-        bytes calldata encodedMsg,
-        bool wrappedToken
+        bytes calldata encodedMsg
     ) public virtual {
         (, bool exists, ) = getTransfer(extId);
         if (!exists) {
             revert("transfer with this ext_id is already exists");
         }
         require(amount > 0, "You need to transfer at least some tokens");
-        IERC20 token = wrappedToken ? IERC20(this) : underlying();
-        uint256 allowance = token.allowance(_msgSender(), address(this));
+        uint256 allowance = underlying().allowance(_msgSender(), address(this));
         require(allowance >= amount, "Check the token allowance");
+
         _createTransfer(
             extId,
             amount,
             encodedDestination,
             encodedMsg,
-            wrappedToken
+            false
+        );
+    }
+
+    function createTransferWrapped(
+        uint256 amount,
+        bytes16 extId,
+        bytes calldata encodedDestination,
+        bytes calldata encodedMsg
+    ) public virtual {
+        (, bool exists, ) = getTransfer(extId);
+        if (!exists) {
+            revert("transfer with this ext_id is already exists");
+        }
+        require(amount > 0, "You need to transfer at least some tokens");
+        _createTransfer(
+            extId,
+            amount,
+            encodedDestination,
+            encodedMsg,
+            true
         );
     }
 
@@ -77,8 +96,7 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
         uint256 deadline,
         uint8 v,
         bytes32 r,
-        bytes32 s,
-        bool wrappedToken
+        bytes32 s
     ) public virtual {
         {
             (, bool exists, ) = getTransfer(extId);
@@ -88,10 +106,7 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
         }
         {
             require(amount > 0, "You need to transfer at least some tokens");
-            address token = wrappedToken
-                ? address(this)
-                : address(underlying());
-            IERC20Permit(token).permit(
+            IERC20Permit(address(underlying())).permit(
                 _msgSender(),
                 address(this),
                 amount,
@@ -106,7 +121,7 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
             amount,
             encodedDestination,
             encodedMsg,
-            wrappedToken
+            false
         );
     }
 

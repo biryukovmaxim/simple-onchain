@@ -29,15 +29,27 @@ contract GaslessSender is Sender, GelatoRelayContextERC2771 {
         uint256 amount,
         bytes16 extId,
         bytes calldata encodedDestination,
-        bytes calldata encodedMsg,
-        bool wrappedToken
-    ) public override maybeGasLess(0xbe04bb07) {
+        bytes calldata encodedMsg
+    ) public override maybeGasLess(0x85f0a47f) {
         super.createTransfer(
             amount,
             extId,
             encodedDestination,
-            encodedMsg,
-            wrappedToken
+            encodedMsg
+        );
+    }
+
+    function createTransferWrapped(
+        uint256 amount,
+        bytes16 extId,
+        bytes calldata encodedDestination,
+        bytes calldata encodedMsg
+    ) public override maybeGasLess(0x73d94fd9) {
+        super.createTransferWrapped(
+            amount,
+            extId,
+            encodedDestination,
+            encodedMsg
         );
     }
 
@@ -49,9 +61,8 @@ contract GaslessSender is Sender, GelatoRelayContextERC2771 {
         uint256 deadline,
         uint8 v,
         bytes32 r,
-        bytes32 s,
-        bool wrappedToken
-    ) public override maybeGasLess(0x9a4d900d) {
+        bytes32 s
+    ) public override maybeGasLess(0xaee2e5a1) {
         super.createTransferPermitted(
             amount,
             extId,
@@ -60,8 +71,7 @@ contract GaslessSender is Sender, GelatoRelayContextERC2771 {
             deadline,
             v,
             r,
-            s,
-            wrappedToken
+            s
         );
     }
 
