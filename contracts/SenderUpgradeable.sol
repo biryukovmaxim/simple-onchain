@@ -188,6 +188,7 @@ contract SenderUpgradeable is
         emit Queued(extId, transfer, encodedDestination, encodedMsg);
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function __Sender_init(
         IERC20Upgradeable token_,
         address executor_
