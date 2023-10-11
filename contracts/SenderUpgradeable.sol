@@ -2,13 +2,19 @@
 
 pragma solidity >=0.8.19 <0.9.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
-contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
+
+contract SenderUpgradeable is
+    Initializable,
+    OwnableUpgradeable,
+    ERC20WrapperUpgradeable,
+    ERC20PermitUpgradeable
+{
     using SafeERC20 for IERC20;
 
     struct TransferStruct {
@@ -30,14 +36,10 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
     );
     event SuccessfulTransfer(bytes16 indexed extId, TransferStruct transfer);
 
-    constructor(
-        IERC20 token_,
-        address executor_
-    )
-        ERC20("Simple USD", "SUSD")
-        ERC20Wrapper(token_)
-        ERC20Permit("Simple USD")
-    {
+    function initialize(IERC20Upgradeable token_, address executor_) external initializer {
+        __ERC20_init("Simple USD", "SUSD");
+        __ERC20Wrapper_init(token_);
+        __ERC20Permit_init("Simple USD");
         _executor = executor_;
     }
 
@@ -153,7 +155,7 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
         public
         view
         virtual
-        override(ERC20, ERC20Wrapper)
+        override(ERC20Upgradeable, ERC20WrapperUpgradeable)
         returns (uint8)
     {
         return 6;
@@ -166,8 +168,8 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
         bytes calldata encodedMsg,
         bool wrappedToken
     ) internal {
-        IERC20 token = wrappedToken ? IERC20(this) : underlying();
-        token.safeTransferFrom(_msgSender(), address(this), amount);
+        IERC20Upgradeable token = wrappedToken ? IERC20Upgradeable(this) : underlying();
+        IERC20(address(token)).safeTransferFrom(_msgSender(), address(this), amount);
         TransferStruct memory transfer = TransferStruct(
             extId,
             _msgSender(),

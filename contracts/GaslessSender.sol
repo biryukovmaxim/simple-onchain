@@ -31,12 +31,7 @@ contract GaslessSender is Sender, GelatoRelayContextERC2771 {
         bytes calldata encodedDestination,
         bytes calldata encodedMsg
     ) public override maybeGasLess(0x85f0a47f) {
-        super.createTransfer(
-            amount,
-            extId,
-            encodedDestination,
-            encodedMsg
-        );
+        super.createTransfer(amount, extId, encodedDestination, encodedMsg);
     }
 
     function createTransferWrapped(
