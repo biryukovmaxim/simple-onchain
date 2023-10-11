@@ -36,12 +36,12 @@ contract SenderUpgradeable is
     );
     event SuccessfulTransfer(bytes16 indexed extId, TransferStruct transfer);
 
-    function initialize(IERC20Upgradeable token_, address executor_) external initializer {
-        __ERC20_init("Simple USD", "SUSD");
-        __ERC20Wrapper_init(token_);
-        __ERC20Permit_init("Simple USD");
-        _executor = executor_;
-    }
+//    function initialize(IERC20Upgradeable token_, address executor_) external initializer {
+//        __ERC20_init("Simple USD", "SUSD");
+//        __ERC20Wrapper_init(token_);
+//        __ERC20Permit_init("Simple USD");
+//        _executor = executor_;
+//    }
 
     function setExecutor(address newExecutor) public onlyOwner {
         _executor = newExecutor;
@@ -180,5 +180,12 @@ contract SenderUpgradeable is
         );
         _transfers[extId] = transfer;
         emit Queued(extId, transfer, encodedDestination, encodedMsg);
+    }
+
+    function __Sender_init(IERC20Upgradeable token_, address executor_) internal onlyInitializing {
+        __ERC20_init("Simple USD", "SUSD");
+        __ERC20Wrapper_init(token_);
+        __ERC20Permit_init("Simple USD");
+        _executor = executor_;
     }
 }
