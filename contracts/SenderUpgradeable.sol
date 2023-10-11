@@ -191,12 +191,14 @@ contract SenderUpgradeable is
     // solhint-disable-next-line func-name-mixedcase
     function __Sender_init(
         IERC20Upgradeable token_,
-        address executor_
+        address executor_,
+        address owner_
     ) internal onlyInitializing {
         __ERC20_init("Simple USD", "SUSD");
         __ERC20Wrapper_init(token_);
         __ERC20Permit_init("Simple USD");
         __Ownable_init();
+        _transferOwnership(owner_);
         _executor = executor_;
     }
 }

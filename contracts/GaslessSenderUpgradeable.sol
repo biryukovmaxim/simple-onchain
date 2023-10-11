@@ -20,9 +20,10 @@ contract GaslessSenderUpgradeable is
     function initialize(
         IERC20Upgradeable token_,
         address executor_,
-        IPaymaster paymaster_
-    ) external initializer {
-        __Sender_init(token_, executor_);
+        IPaymaster paymaster_,
+        address owner_
+    ) external reinitializer(3) {
+        __Sender_init(token_, executor_, owner_);
         paymaster = paymaster_;
     }
 
