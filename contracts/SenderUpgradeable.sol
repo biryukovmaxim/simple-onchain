@@ -196,6 +196,7 @@ contract SenderUpgradeable is
         __ERC20_init("Simple USD", "SUSD");
         __ERC20Wrapper_init(token_);
         __ERC20Permit_init("Simple USD");
+        __Ownable_init();
         _executor = executor_;
     }
 }
