@@ -5,7 +5,11 @@ import "@gelatonetwork/relay-context/contracts/GelatoRelayContextERC2771.sol";
 import "./SenderUpgradeable.sol";
 import "./IPaymaster.sol";
 
-contract GaslessSenderUpgradeable is Initializable, SenderUpgradeable, GelatoRelayContextERC2771 {
+contract GaslessSenderUpgradeable is
+    Initializable,
+    SenderUpgradeable,
+    GelatoRelayContextERC2771
+{
     IPaymaster public paymaster;
 
     modifier maybeGasLess(bytes4 hash) {
@@ -13,9 +17,11 @@ contract GaslessSenderUpgradeable is Initializable, SenderUpgradeable, GelatoRel
         _payToRelayer(hash);
     }
 
-    function initialize(IERC20Upgradeable token_,
+    function initialize(
+        IERC20Upgradeable token_,
         address executor_,
-        IPaymaster paymaster_) external initializer {
+        IPaymaster paymaster_
+    ) external initializer {
         __Sender_init(token_, executor_);
         paymaster = paymaster_;
     }
