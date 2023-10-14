@@ -59,7 +59,7 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
         uint256 allowance = underlying().allowance(_msgSender(), address(this));
         require(allowance >= amount, "Check the token allowance");
 
-        _createTransfer(extId, amount, encodedDestination, encodedMsg, false);
+        _createTransfer(extId, amount, encodedDestination, encodedMsg);
     }
 
     function createTransferWrapped(
@@ -73,7 +73,19 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
             revert("transfer with this ext_id is already exists");
         }
         require(amount > 0, "You need to transfer at least some tokens");
-        _createTransfer(extId, amount, encodedDestination, encodedMsg, true);
+        address sender = _msgSender();
+        _transfer(sender, address(this), amount);
+
+        TransferStruct memory transfer = TransferStruct(
+            extId,
+            sender,
+            amount,
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp,
+            true
+        );
+        _transfers[extId] = transfer;
+        emit Queued(extId, transfer, encodedDestination, encodedMsg);
     }
 
     function createTransferPermitted(
@@ -104,7 +116,7 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
                 s
             );
         }
-        _createTransfer(extId, amount, encodedDestination, encodedMsg, false);
+        _createTransfer(extId, amount, encodedDestination, encodedMsg);
     }
 
     function executeTransfer(bytes16 extId, address to) public {
@@ -163,18 +175,16 @@ contract Sender is Ownable, ERC20Wrapper, ERC20Permit {
         bytes16 extId,
         uint256 amount,
         bytes calldata encodedDestination,
-        bytes calldata encodedMsg,
-        bool wrappedToken
+        bytes calldata encodedMsg
     ) internal {
-        IERC20 token = wrappedToken ? IERC20(this) : underlying();
-        token.safeTransferFrom(_msgSender(), address(this), amount);
+        underlying().safeTransferFrom(_msgSender(), address(this), amount);
         TransferStruct memory transfer = TransferStruct(
             extId,
             _msgSender(),
             amount,
             // solhint-disable-next-line not-rely-on-time
             block.timestamp,
-            wrappedToken
+            false
         );
         _transfers[extId] = transfer;
         emit Queued(extId, transfer, encodedDestination, encodedMsg);
