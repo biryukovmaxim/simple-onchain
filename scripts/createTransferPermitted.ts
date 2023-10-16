@@ -17,6 +17,7 @@ async function main() {
   ) as GaslessSender;
   const ERC20Permit = await ethers.getContractFactory("MockToken");
   const USD = ERC20Permit.attach(process.env.TOKEN!) as MockToken;
+
   // Prepare the permit signature
   const nonce = await USD.nonces(caller.address);
   const deadline = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour from now
@@ -26,7 +27,7 @@ async function main() {
   const domain = {
     name: await USD.name(),
     version: "1",
-    chainId: 421613,
+    chainId: 42161,
     verifyingContract: await USD.getAddress(),
   };
 
@@ -86,13 +87,12 @@ async function main() {
     sig.v,
     sig.r,
     sig.s,
-    false
   );
 
   const relay = new GelatoRelay();
   const request: CallWithSyncFeeERC2771Request = {
     user: caller.address,
-    chainId: 421613n,
+    chainId: 42161n,
     target: await gaslessSender.getAddress(),
     data: tx.data,
     feeToken: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
