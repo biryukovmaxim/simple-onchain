@@ -22,7 +22,7 @@ async function main() {
   const value = ethers.parseUnits("1", 6);
 
   const transferTx = await gaslessSender.transfer.populateTransaction(
-    '0x2812946C6Efc4Cd6eE6EE171347D8C43B4221323',
+    "0x2812946C6Efc4Cd6eE6EE171347D8C43B4221323",
     value
   );
 

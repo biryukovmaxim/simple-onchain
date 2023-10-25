@@ -6,15 +6,8 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 
-contract SenderUpgradeable is
-    Initializable,
-    OwnableUpgradeable,
-    ERC20WrapperUpgradeable,
-    ERC20PermitUpgradeable
-{
+contract SenderUpgradeable is Initializable, OwnableUpgradeable {
     using SafeERC20 for IERC20;
 
     struct TransferStruct {
@@ -22,9 +15,9 @@ contract SenderUpgradeable is
         address from;
         uint256 amount;
         uint256 createdAt;
-        bool wrappedToken;
     }
 
+    IERC20 public token;
     address private _executor;
     mapping(bytes16 extId => TransferStruct transfer) private _transfers;
 
@@ -58,36 +51,10 @@ contract SenderUpgradeable is
             revert("transfer with this ext_id is already exists");
         }
         require(amount > 0, "You need to transfer at least some tokens");
-        uint256 allowance = underlying().allowance(_msgSender(), address(this));
+        uint256 allowance = token.allowance(_msgSender(), address(this));
         require(allowance >= amount, "Check the token allowance");
 
         _createTransfer(extId, amount, encodedDestination, encodedMsg);
-    }
-
-    function createTransferWrapped(
-        uint256 amount,
-        bytes16 extId,
-        bytes calldata encodedDestination,
-        bytes calldata encodedMsg
-    ) public virtual {
-        (, bool exists, ) = getTransfer(extId);
-        if (!exists) {
-            revert("transfer with this ext_id is already exists");
-        }
-        require(amount > 0, "You need to transfer at least some tokens");
-        address sender = _msgSender();
-        _transfer(sender, address(this), amount);
-
-        TransferStruct memory transfer = TransferStruct(
-            extId,
-            sender,
-            amount,
-            // solhint-disable-next-line not-rely-on-time
-            block.timestamp,
-            true
-        );
-        _transfers[extId] = transfer;
-        emit Queued(extId, transfer, encodedDestination, encodedMsg);
     }
 
     function createTransferPermitted(
@@ -108,7 +75,7 @@ contract SenderUpgradeable is
         }
         {
             require(amount > 0, "You need to transfer at least some tokens");
-            IERC20Permit(address(underlying())).permit(
+            IERC20Permit(address(token)).permit(
                 _msgSender(),
                 address(this),
                 amount,
@@ -119,6 +86,33 @@ contract SenderUpgradeable is
             );
         }
         _createTransfer(extId, amount, encodedDestination, encodedMsg);
+    }
+
+    function transferFromPermitted(
+        address to,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public virtual {
+        require(amount > 0, "You need to transfer at least some tokens");
+        IERC20Permit(address(token)).permit(
+            _msgSender(),
+            address(this),
+            amount,
+            deadline,
+            v,
+            r,
+            s
+        );
+        token.safeTransferFrom(_msgSender(), to, amount);
+    }
+
+    function transferFrom(address to, uint256 amount) public virtual {
+        uint256 allowance = token.allowance(_msgSender(), address(this));
+        require(allowance >= amount, "Check the token allowance");
+        token.safeTransferFrom(_msgSender(), to, amount);
     }
 
     function executeTransfer(bytes16 extId, address to) public {
@@ -138,11 +132,8 @@ contract SenderUpgradeable is
         uint256 amount = transfer.amount;
         require(amount > 0);
         _transfers[extId].amount = 0;
-        if (transfer.wrappedToken) {
-            _transfer(address(this), to, amount);
-        } else {
-            _mint(to, amount);
-        }
+
+        token.safeTransfer(to, amount);
     }
 
     function getTransfer(
@@ -163,35 +154,19 @@ contract SenderUpgradeable is
         return (order, false, false);
     }
 
-    function decimals()
-        public
-        view
-        virtual
-        override(ERC20Upgradeable, ERC20WrapperUpgradeable)
-        returns (uint8)
-    {
-        return 6;
-    }
-
     function _createTransfer(
         bytes16 extId,
         uint256 amount,
         bytes calldata encodedDestination,
         bytes calldata encodedMsg
     ) internal {
-        IERC20(address(underlying())).safeTransferFrom(
-            _msgSender(),
-            address(this),
-            amount
-        );
-
+        token.safeTransferFrom(_msgSender(), address(this), amount);
         TransferStruct memory transfer = TransferStruct(
             extId,
             _msgSender(),
             amount,
             // solhint-disable-next-line not-rely-on-time
-            block.timestamp,
-            false
+            block.timestamp
         );
         _transfers[extId] = transfer;
         emit Queued(extId, transfer, encodedDestination, encodedMsg);
@@ -199,15 +174,13 @@ contract SenderUpgradeable is
 
     // solhint-disable-next-line func-name-mixedcase
     function __Sender_init(
-        IERC20Upgradeable token_,
+        IERC20 token_,
         address executor_,
         address owner_
     ) internal onlyInitializing {
-        __ERC20_init("Simple USD", "SUSD");
-        __ERC20Wrapper_init(token_);
-        __ERC20Permit_init("Simple USD");
         __Ownable_init();
         _transferOwnership(owner_);
         _executor = executor_;
+        token = token_;
     }
 }

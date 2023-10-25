@@ -18,7 +18,7 @@ contract Sender is Ownable {
         uint256 createdAt;
     }
 
-    IERC20 public immutable token;
+    IERC20 public immutable TOKEN;
     address private _executor;
     mapping(bytes16 extId => TransferStruct transfer) private _transfers;
 
@@ -31,7 +31,7 @@ contract Sender is Ownable {
     event SuccessfulTransfer(bytes16 indexed extId, TransferStruct transfer);
 
     constructor(IERC20 token_, address executor_) {
-        token = token_;
+        TOKEN = token_;
         _executor = executor_;
     }
 
@@ -50,7 +50,7 @@ contract Sender is Ownable {
             revert("transfer with this ext_id is already exists");
         }
         require(amount > 0, "You need to transfer at least some tokens");
-        uint256 allowance = token.allowance(_msgSender(), address(this));
+        uint256 allowance = TOKEN.allowance(_msgSender(), address(this));
         require(allowance >= amount, "Check the token allowance");
 
         _createTransfer(extId, amount, encodedDestination, encodedMsg);
@@ -74,7 +74,7 @@ contract Sender is Ownable {
         }
         {
             require(amount > 0, "You need to transfer at least some tokens");
-            IERC20Permit(address(token)).permit(
+            IERC20Permit(address(TOKEN)).permit(
                 _msgSender(),
                 address(this),
                 amount,
@@ -96,7 +96,7 @@ contract Sender is Ownable {
         bytes32 s
     ) public virtual {
         require(amount > 0, "You need to transfer at least some tokens");
-        IERC20Permit(address(token)).permit(
+        IERC20Permit(address(TOKEN)).permit(
             _msgSender(),
             address(this),
             amount,
@@ -105,13 +105,13 @@ contract Sender is Ownable {
             r,
             s
         );
-        token.safeTransferFrom(_msgSender(), to, amount);
+        TOKEN.safeTransferFrom(_msgSender(), to, amount);
     }
 
     function transferFrom(address to, uint256 amount) public virtual {
-        uint256 allowance = token.allowance(_msgSender(), address(this));
+        uint256 allowance = TOKEN.allowance(_msgSender(), address(this));
         require(allowance >= amount, "Check the token allowance");
-        token.safeTransferFrom(_msgSender(), to, amount);
+        TOKEN.safeTransferFrom(_msgSender(), to, amount);
     }
 
     function executeTransfer(bytes16 extId, address to) public {
@@ -132,7 +132,7 @@ contract Sender is Ownable {
         require(amount > 0);
         _transfers[extId].amount = 0;
 
-        token.safeTransfer(to, amount);
+        TOKEN.safeTransfer(to, amount);
     }
 
     function getTransfer(
@@ -159,7 +159,7 @@ contract Sender is Ownable {
         bytes calldata encodedDestination,
         bytes calldata encodedMsg
     ) internal {
-        token.safeTransferFrom(_msgSender(), address(this), amount);
+        TOKEN.safeTransferFrom(_msgSender(), address(this), amount);
         TransferStruct memory transfer = TransferStruct(
             extId,
             _msgSender(),
