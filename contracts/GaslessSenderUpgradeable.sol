@@ -18,7 +18,7 @@ contract GaslessSenderUpgradeable is
     }
 
     function initialize(
-        IERC20Upgradeable token_,
+        IERC20 token_,
         address executor_,
         IPaymaster paymaster_,
         address owner_
@@ -38,20 +38,6 @@ contract GaslessSenderUpgradeable is
         bytes calldata encodedMsg
     ) public override maybeGasLess(0x85f0a47f) {
         super.createTransfer(amount, extId, encodedDestination, encodedMsg);
-    }
-
-    function createTransferWrapped(
-        uint256 amount,
-        bytes16 extId,
-        bytes calldata encodedDestination,
-        bytes calldata encodedMsg
-    ) public override maybeGasLess(0x73d94fd9) {
-        super.createTransferWrapped(
-            amount,
-            extId,
-            encodedDestination,
-            encodedMsg
-        );
     }
 
     function createTransferPermitted(
@@ -76,46 +62,22 @@ contract GaslessSenderUpgradeable is
         );
     }
 
-    function depositFor(
-        address account,
-        uint256 amount
-    ) public override maybeGasLess(0x2f4f21e2) returns (bool) {
-        return super.depositFor(account, amount);
+    function transferFromPermitted(
+        address to,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public override maybeGasLess(0x402fb3f6) {
+        return super.transferFromPermitted(to, amount, deadline, v, r, s);
     }
 
-    function withdrawTo(
-        address account,
-        uint256 amount
-    ) public override maybeGasLess(0x205c2878) returns (bool) {
-        return super.withdrawTo(account, amount);
-    }
-
-    function transfer(
+    function transferFrom(
         address to,
         uint256 amount
-    ) public override maybeGasLess(0xa9059cbb) returns (bool) {
-        return super.transfer(to, amount);
-    }
-
-    function approve(
-        address spender,
-        uint256 amount
-    ) public override maybeGasLess(0x095ea7b3) returns (bool) {
-        return super.approve(spender, amount);
-    }
-
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) public override maybeGasLess(0x39509351) returns (bool) {
-        return super.increaseAllowance(spender, addedValue);
-    }
-
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) public override maybeGasLess(0xa457c2d7) returns (bool) {
-        return super.decreaseAllowance(spender, subtractedValue);
+    ) public override maybeGasLess(0x01c6adc3) {
+        return super.transferFrom(to, amount);
     }
 
     function _payToRelayer(bytes4 func) internal {

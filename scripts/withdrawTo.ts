@@ -17,7 +17,7 @@ async function main() {
   ) as GaslessSender;
 
   const provider = new ethers.JsonRpcProvider(
-    "https://endpoints.omniatech.io/v1/arbitrum/one/public"
+    "https://rpc.ankr.com/arbitrum/76e1e00748fd6e2967a12424c64281015904fcf2a37f36c46dbec41814bd1548"
   );
   gaslessSender.connect(provider);
 

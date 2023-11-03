@@ -69,20 +69,12 @@ async function main() {
   // sign the Permit type data with the deployer's private key
   const signature = await caller.signTypedData(domain, types, values);
   const sig = ethers.Signature.from(signature);
-  let uuid = UuidTool.newUuid();
-  const extId = Uint8Array.from(UuidTool.toBytes(uuid));
-  const encodedDst =
-    "0x048931187d09292838a5eb357f4fbd0c3285aab463e7503899bfa3a402c5826b751fd76fff4c2d22f2272e2a0c719c81044ed4ceea4b033509741c94de8fa85953e95ff78ce1ee7176f36518c65b26e0236f591787bf3273bec60223bc3be6fb07708febddb7816d6855411156";
-  const encodedMsg = "0x";
-
   const provider = new ethers.JsonRpcProvider(process.env.RPC_URL!);
   gaslessSender.connect(provider);
 
-  const tx = await gaslessSender.createTransferPermitted.populateTransaction(
+  const tx = await gaslessSender.transferFromPermitted.populateTransaction(
+    "0xbc9016cBbA36eb51213d992aF0B89207Ae787D6C",
     value,
-    extId,
-    encodedDst,
-    encodedMsg,
     deadline,
     sig.v,
     sig.r,

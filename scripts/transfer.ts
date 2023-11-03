@@ -15,39 +15,19 @@ async function main() {
   ) as GaslessSender;
 
   const provider = new ethers.JsonRpcProvider(
-    "https://endpoints.omniatech.io/v1/arbitrum/one/public"
+    "https://rpc.ankr.com/arbitrum/76e1e00748fd6e2967a12424c64281015904fcf2a37f36c46dbec41814bd1548"
   );
   gaslessSender.connect(provider);
 
-  const value = ethers.parseUnits("2", 6);
+  const value = ethers.parseUnits("1", 6);
 
-  const approveTx = await gaslessSender.approve.populateTransaction(
-    caller.address,
+  const transferTx = await gaslessSender.transfer.populateTransaction(
+    "0x2812946C6Efc4Cd6eE6EE171347D8C43B4221323",
     value
   );
 
   const relay = new GelatoRelay();
-  const approveRequest: CallWithSyncFeeERC2771Request = {
-    user: caller.address,
-    chainId: 42161n,
-    target: await gaslessSender.getAddress(),
-    data: approveTx.data,
-    feeToken: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-    isRelayContext: true,
-  };
-
-  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
-  // @ts-ignore
-  let response = await relay.callWithSyncFeeERC2771(approveRequest, wallet);
-  console.log({ response });
-  await new Promise((r) => setTimeout(r, 5000));
-
-  const transferTx = await gaslessSender.transfer.populateTransaction(
-    "0x8389EBC35351D72280C7dF476B5A6c73393FC6BF",
-    value
-  );
-
-  const transferRequest: CallWithSyncFeeERC2771Request = {
+  const request: CallWithSyncFeeERC2771Request = {
     user: caller.address,
     chainId: 42161n,
     target: await gaslessSender.getAddress(),
@@ -56,8 +36,9 @@ async function main() {
     isRelayContext: true,
   };
 
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
   // @ts-ignore
-  response = await relay.callWithSyncFeeERC2771(transferRequest, wallet);
+  const response = await relay.callWithSyncFeeERC2771(request, wallet);
   console.log({ response });
 }
 
