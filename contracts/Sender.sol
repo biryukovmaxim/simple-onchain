@@ -28,6 +28,15 @@ contract Sender is Ownable {
         bytes encodedDestination,
         bytes encodedMsg
     );
+
+    event DirectTransfer(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 createdAt,
+        bytes encodedMsg
+    );
+
     event SuccessfulTransfer(bytes16 indexed extId, TransferStruct transfer);
 
     constructor(IERC20 token_, address executor_) {
@@ -90,6 +99,7 @@ contract Sender is Ownable {
     function transferFromPermitted(
         address to,
         uint256 amount,
+        bytes calldata encodedMsg,
         uint256 deadline,
         uint8 v,
         bytes32 r,
@@ -105,12 +115,32 @@ contract Sender is Ownable {
             r,
             s
         );
+        emit DirectTransfer(
+            _msgSender(),
+            to,
+            amount,
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp,
+            encodedMsg
+        );
         TOKEN.safeTransferFrom(_msgSender(), to, amount);
     }
 
-    function transferFrom(address to, uint256 amount) public virtual {
+    function transferFrom(
+        address to,
+        uint256 amount,
+        bytes calldata encodedMsg
+    ) public virtual {
         uint256 allowance = TOKEN.allowance(_msgSender(), address(this));
         require(allowance >= amount, "Check the token allowance");
+        emit DirectTransfer(
+            _msgSender(),
+            to,
+            amount,
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp,
+            encodedMsg
+        );
         TOKEN.safeTransferFrom(_msgSender(), to, amount);
     }
 

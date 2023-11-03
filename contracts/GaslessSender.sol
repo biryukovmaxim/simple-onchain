@@ -59,19 +59,21 @@ contract GaslessSender is Sender, GelatoRelayContextERC2771 {
     function transferFromPermitted(
         address to,
         uint256 amount,
+        bytes calldata encodedMsg,
         uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public override maybeGasLess(0x402fb3f6) {
-        return super.transferFromPermitted(to, amount, deadline, v, r, s);
+    ) public override maybeGasLess(0x5525b8ca) {
+        return super.transferFromPermitted(to, amount, encodedMsg, deadline, v, r, s);
     }
 
     function transferFrom(
         address to,
-        uint256 amount
-    ) public override maybeGasLess(0x01c6adc3) {
-        return super.transferFrom(to, amount);
+        uint256 amount,
+        bytes calldata encodedMsg
+    ) public override maybeGasLess(0xd311a045) {
+        return super.transferFrom(to, amount, encodedMsg);
     }
 
     function _payToRelayer(bytes4 func) internal {
