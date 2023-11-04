@@ -27,6 +27,15 @@ contract SenderUpgradeable is Initializable, OwnableUpgradeable {
         bytes encodedDestination,
         bytes encodedMsg
     );
+
+    event DirectTransfer(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 createdAt,
+        bytes encodedMsg
+    );
+
     event SuccessfulTransfer(bytes16 indexed extId, TransferStruct transfer);
 
     //    function initialize(IERC20Upgradeable token_, address executor_) external initializer {
@@ -91,6 +100,7 @@ contract SenderUpgradeable is Initializable, OwnableUpgradeable {
     function transferFromPermitted(
         address to,
         uint256 amount,
+        bytes calldata encodedMsg,
         uint256 deadline,
         uint8 v,
         bytes32 r,
@@ -106,12 +116,32 @@ contract SenderUpgradeable is Initializable, OwnableUpgradeable {
             r,
             s
         );
+        emit DirectTransfer(
+            _msgSender(),
+            to,
+            amount,
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp,
+            encodedMsg
+        );
         token.safeTransferFrom(_msgSender(), to, amount);
     }
 
-    function transferFrom(address to, uint256 amount) public virtual {
+    function transferFrom(
+        address to,
+        uint256 amount,
+        bytes calldata encodedMsg
+    ) public virtual {
         uint256 allowance = token.allowance(_msgSender(), address(this));
         require(allowance >= amount, "Check the token allowance");
+        emit DirectTransfer(
+            _msgSender(),
+            to,
+            amount,
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp,
+            encodedMsg
+        );
         token.safeTransferFrom(_msgSender(), to, amount);
     }
 
