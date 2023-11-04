@@ -22,7 +22,7 @@ contract GaslessSenderUpgradeable is
         address executor_,
         IPaymaster paymaster_,
         address owner_
-    ) external reinitializer(3) {
+    ) external reinitializer(4) {
         __Sender_init(token_, executor_, owner_);
         paymaster = paymaster_;
     }
